@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import Booking from "@/app/utils/models/booking";
+import Booking from "../../utils/models/Booking"
 import connectToDB from "@/app/utils/config/db";
 import { auth } from '@/app/auth';
 

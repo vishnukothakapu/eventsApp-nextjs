@@ -1,5 +1,5 @@
 import React from 'react'
-import AddEvent from "@/app/components/AddEvent";
+import AddEvent from "@/app/utils/models/Event";
 
 const Page = () => {
     return (
