@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import {generatePDF} from "@/app/utils/config/generatePDF";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const BookingDetailsPage = ({ params }) => {
@@ -76,8 +76,9 @@ const BookingDetailsPage = ({ params }) => {
                     <p><strong>Booking ID:</strong> EVT{booking._id}</p>
                     <p><strong>Date:</strong> {formatDate(booking.event?.date)}</p>
                     <p><strong>Time:</strong> {booking.event?.time}</p>
-                    <p><strong>Location:</strong> {booking.event?.location || "N/A"}</p>
                     <p><strong>Mode:</strong> {booking.event?.isOnline ? "Online" : "Offline"}</p>
+                    {booking.event?.isOnline?<p><strong>Event Link: </strong><Link className="cursor-pointer text-indigo-600" href={booking.event?.onlineLink}>{booking.event?.onlineLink}</Link></p>:<p><strong>Location: </strong>{booking.event?.location}</p>}
+
                     <p><strong>Price:</strong> ₹{booking.price}</p>
                 </div>
 

@@ -45,7 +45,6 @@ export async function POST(req,{params}){
             event:event._id,
             user:user.id,
             price:amount/100,
-            bookingCode:"",
             orderId:order.id,
             paymentId:"",
             paymentSign:"",
@@ -68,7 +67,6 @@ export async function PUT(req,{params}){
         const user = session?.user;
         const {eventId} = params;
         const {paymentId,orderId,signature}=await req.json();
-        const bookingCode = uniqid("EVT");
         const booking = await Booking.findOne({orderId});
         if (!booking) {
             return NextResponse.json({success:false,error:"Booking not found"},{status:404});
@@ -81,7 +79,6 @@ export async function PUT(req,{params}){
         console.log("Payment Bank:",payment.method);
         console.log("Payment Method:",payment.method);
         const bookingDoc = {
-            bookingCode,
             paymentId,
             paymentSign:signature,
             paymentMethod:payment.method||"",

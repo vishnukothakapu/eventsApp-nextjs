@@ -16,7 +16,6 @@ const BookingSchema = new mongoose.Schema({
     },
     bookingCode:{
         type: String,
-        required: true,
     },
     orderId:{
         type:String,

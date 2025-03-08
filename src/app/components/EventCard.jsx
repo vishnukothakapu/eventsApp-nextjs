@@ -35,7 +35,8 @@ const EventCard = ({ filteredEvents, user }) => {
                                     src={event.image}
                                     alt={event.title}
                                     fill
-                                    className="rounded-t-md object-cover"
+                                    className="rounded-t-md object-cover cursor-pointer"
+                                    onClick={()=>router.push(`/events/${event._id}`)}
                                 />
                             </div>
                         )}
@@ -50,7 +51,7 @@ const EventCard = ({ filteredEvents, user }) => {
                     </CardHeader>
                     <CardContent className="flex-1 p-4">
                         <div className="mb-2">
-                            <CardTitle className="text-xl font-semibold">{event.title}</CardTitle>
+                            <CardTitle className="text-xl font-semibold cursor-pointer" onClick={()=>router.push(`/events/${event._id}`)}>{event.title}</CardTitle>
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">

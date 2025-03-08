@@ -4,9 +4,7 @@ import { userSession } from "@/app/utils/config/userSession";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import QRCode from "qrcode";
-import { jsPDF } from "jspdf";
-import autoTable from 'jspdf-autotable';
+import {generatePDF} from '@/app/utils/config/generatePDF';
 import { Button } from "@/components/ui/button";
 
 const Page = () => {
@@ -52,51 +50,6 @@ const Page = () => {
 
         fetchSession();
     }, [router]);
-
-    const generatePDF = async (booking) => {
-        const doc = new jsPDF();
-        const logo = '/assets/images/confirmed_logo.jpg';
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(24);
-        doc.text("EVENTS.", 105, 20, { align: "center" });
-        
-        // Generate QR Code
-        const qrData = `Booking ID: ${booking._id}`;
-        const qrImageData = await QRCode.toDataURL(qrData);
-        doc.addImage(qrImageData, "PNG", 150, 30, 40, 40);
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Booking Id: ${booking.orderId}`,20,30);
-        doc.text(`Event Name: ${booking.event?.title || "N/A"}`, 20, 40);
-        doc.text(`Date & Time: ${formatDate(booking.event?.date)} at ${formatTime(booking.event?.time) || "N/A"}`, 20, 50);
-        doc.text(`Location: ${booking.event?.location || "N/A"}`, 20, 60);
-        doc.text(`Mode: ${booking.event?.isOnline ? "Online" : "Offline"}`, 20, 70);
-        doc.text(`Price: ${booking.price}`, 20, 80);
-        doc.line(20, 90, 190, 90);
-
-        doc.setFontSize(12);
-        doc.text("Payment Details", 20, 100);
-
-        autoTable(doc,{
-            startY: 110,
-            head: [["Field", "Value"]],
-            body: [
-                ["Price", `${booking.price}`],
-                ["Paid on", formatDate(booking.bookedAt)],
-                ["Payment Mode", booking.paymentMethod.toUpperCase()],
-                ["Payment ID", booking.paymentId],
-                ["Bank Name", booking.paymentBank],
-            ],
-            theme: "grid",
-            styles: { fontSize: 10, cellPadding: 2 },
-            headStyles: { fillColor: [76, 81, 191] },
-        });
-
-
-        doc.save(`EVENTS_${booking.event._id}.pdf`);
-    };
-
     if (loading) return <p className="text-center text-lg font-semibold">Loading...</p>;
     if (bookings.length === 0) return <p className="text-center text-lg font-semibold">No bookings found.</p>;
 
