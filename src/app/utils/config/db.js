@@ -3,17 +3,25 @@ import mongoose from "mongoose";
 let isConnected = false;
 
 const connectToDB = async () => {
-    if (mongoose.connection.readyState >= 1) {
-        return;
-    }
+    if (mongoose.connection.readyState >= 1) return;
+
     try {
-        await mongoose.connect(process.env.MONGO_URI,{
+        const uri = process.env.MONGO_URI;
+
+        if (!uri) {
+            throw new Error("MONGODB_URI is not defined in environment variables.");
+        }
+
+        await mongoose.connect(uri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
             serverSelectionTimeoutMS: 30000,
         });
+
         isConnected = true;
-        console.log("Connected to Database");
+        console.log("Connected to MongoDB Atlas");
     } catch (err) {
-        console.error("Database connection failed:", err);
+        console.error("MongoDB connection failed:", err);
         throw new Error("Database connection failed");
     }
 };

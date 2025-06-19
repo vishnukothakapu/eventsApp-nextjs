@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, MapPin, User, Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -9,9 +9,9 @@ const EventCard = ({ filteredEvents, user }) => {
     const router = useRouter();
 
     const formatDate = (dateString) => {
-        const options = { weekday: "long", day: "2-digit", month: "short" };
+        const options = { weekday: "short", day: "numeric", month: "short" };
         const date = new Date(dateString);
-        return `${date.toLocaleDateString("en-US", options)}`;
+        return date.toLocaleDateString("en-US", options);
     };
 
     const formatTime = (timeString) => {
@@ -22,69 +22,97 @@ const EventCard = ({ filteredEvents, user }) => {
     };
 
     return (
-        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredEvents.map((event) => (
-                <Card
+                <Card 
                     key={event._id}
-                    className="flex flex-col hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-[#0c111d] dark:border h-full"
+                    className="group flex flex-col h-full overflow-hidden border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white dark:bg-gray-900/50 backdrop-blur-sm"
                 >
-                    <CardHeader className="p-0">
-                        {event.image && (
-                            <div className="relative w-full h-48">
-                                <Image
-                                    src={event.image}
-                                    alt={event.title}
-                                    fill
-                                    className="rounded-t-md object-cover cursor-pointer"
-                                    onClick={()=>router.push(`/events/${event._id}`)}
-                                />
-                            </div>
-                        )}
-                        <div className="flex gap-3 items-center p-4">
-                            <p className="text-gray-600 font-medium bg-gray-200 dark:bg-[#161b26] dark:border dark:text-gray-300 px-2 py-1 rounded-md text-center">
+                    {/* Event Image */}
+                    <div className="relative aspect-video overflow-hidden">
+                        <Image
+                            src={event.image || "/default-event.jpg"}
+                            alt={event.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            onClick={() => router.push(`/events/${event._id}`)}
+                        />
+                        <div className="absolute bottom-3 left-3 flex gap-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-600 text-white backdrop-blur-sm">
                                 {event.category}
-                            </p>
-                            <p className="text-gray-600 font-medium bg-gray-200 dark:bg-[#161b26] dark:border dark:text-gray-300 px-2 py-1 rounded-md text-center">
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-900 dark:bg-gray-800 dark:text-white backdrop-blur-sm">
                                 {event.isOnline ? "Online" : "Offline"}
-                            </p>
+                            </span>
                         </div>
-                    </CardHeader>
-                    <CardContent className="flex-1 p-4">
-                        <div className="mb-2">
-                            <CardTitle className="text-xl font-semibold cursor-pointer" onClick={()=>router.push(`/events/${event._id}`)}>{event.title}</CardTitle>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <CalendarClock className="w-5 h-5" />
-                                <p className="text-gray-600 dark:text-gray-300">
-                                    {formatDate(event.date)}, {formatTime(event.time)}
-                                </p>
-                            </div>
-                            <p className="text-gray-600 dark:text-gray-300">
-                                <strong>Host: </strong>
-                                {event.host.name}
-                                {user && event.host._id === user.id && (
-                                    <span className="text-indigo-700"> (You)</span>
-                                )}
-                            </p>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between items-center border-t p-4">
-                        {event.price === 0 ? (
-                            <p className="text-md text-white dark:text-[#75e0a7] bg-green-600 border dark:border-[#75e0a7] dark:bg-[#053321] px-4 py-2 rounded-md cursor-not-allowed">
-                                Free
-                            </p>
-                        ) : (
-                            <p className="text-md rounded-md cursor-not-allowed dark:bg-[#161b26] dark:text-white bg-gray-200 dark:border px-4 py-2">
-                                ₹ {event.price}
-                            </p>
-                        )}
-                        <Button
-                            className="px-4 py-2 bg-indigo-700 text-white rounded-md hover:bg-indigo-800 transition-all"
+                    </div>
+
+                    {/* Event Content */}
+                    <CardContent className="flex-1 p-5 space-y-4">
+                        <CardTitle 
+                            className="text-xl font-bold line-clamp-2 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                             onClick={() => router.push(`/events/${event._id}`)}
                         >
-                            View Details
-                        </Button>
+                            {event.title}
+                        </CardTitle>
+
+                        <div className="space-y-3 text-sm">
+                            <div className="flex items-center gap-3">
+                                <CalendarClock className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                                        {formatDate(event.date)}
+                                    </p>
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                        {formatTime(event.time)}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <MapPin className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                                <p className="text-gray-600 dark:text-gray-400 line-clamp-1">
+                                    {event.location || event.location==null?"Online Event":""}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <User className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Hosted by <span className="font-medium text-gray-900 dark:text-gray-100">
+                                        {event.host.name}
+                                        {user && event.host._id === user.id && (
+                                            <span className="text-indigo-600 dark:text-indigo-400"> (You)</span>
+                                        )}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+
+                    {/* Event Footer */}
+                    <CardFooter className="p-5 pt-0 border-t border-gray-200 dark:border-gray-800">
+                        <div className="w-full flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Ticket className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                {event.price === 0 ? (
+                                    <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                                        Free
+                                    </span>
+                                ) : (
+                                    <span className="font-bold text-gray-900 dark:text-gray-100">
+                                        ₹{event.price}
+                                    </span>
+                                )}
+                            </div>
+                            <Button
+                                size="sm"
+                                className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20 dark:shadow-indigo-900/30 mt-2"
+                                onClick={() => router.push(`/events/${event._id}`)}
+                            >
+                                View Details
+                            </Button>
+                        </div>
                     </CardFooter>
                 </Card>
             ))}

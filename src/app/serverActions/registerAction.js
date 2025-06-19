@@ -4,7 +4,6 @@ import User from '../utils/models/User';
 import {nanoid} from 'nanoid';
 import bcrypt from 'bcryptjs';
 import path from 'path';
-import upload from '../utils/config/fileUpload';
 import {writeFile,mkdir} from 'fs/promises';
 import {fileURLToPath} from "url";
 export async function registerAction(formData){

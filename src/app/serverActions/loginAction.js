@@ -1,7 +1,7 @@
 "use server"
 import connectToDB from '../utils/config/db'
 import {signIn} from '../auth';
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import User from '../utils/models/User';
 export async function loginAction(userDetails){

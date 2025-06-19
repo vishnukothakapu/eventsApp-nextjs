@@ -12,6 +12,8 @@ const razorpay = new Razorpay({
 export async function GET(req,{params}){
     try {
         await connectToDB();
+        const session = await auth();
+        const user = session?.user;
         const {eventId} = params;
         const event = await Event.findById(eventId).populate("host","name").exec();
         if(!event){

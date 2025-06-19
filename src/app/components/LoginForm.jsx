@@ -1,9 +1,9 @@
 "use client";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {signIn} from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { FcGoogle } from "react-icons/fc";
-import {userSession} from "@/app/utils/config/userSession";
+import { userSession } from "@/app/utils/config/userSession";
 import {
   Card,
   CardContent,
@@ -15,137 +15,184 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {AlertCircle,CircleCheck} from 'lucide-react'
-import {useRouter} from 'next/navigation';
+import { AlertCircle, CircleCheck, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { loginAction } from '../serverActions/loginAction';
+import { Separator } from "@/components/ui/separator";
 import Link from 'next/link';
+
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [state, setState] = useState(false)
   const [message, setMessage] = useState("");
-  const [isAuthenticated,setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+
   useEffect(() => {
-    const fetchSession = async()=>{
+    const fetchSession = async () => {
       const session = await userSession();
-      if(session?.user){
-        setIsAuthenticated(true);
-      }
+      setIsAuthenticated(!!session?.user);
     };
     fetchSession();
   }, []);
+
+  if (isAuthenticated) {
+    router.push("/");
+    return null;
+  }
+
   async function handleLogin(e) {
-    e.preventDefault();      
-    const userDetails = { email, password };
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setMessage("");
+
     try {
-      const response = await loginAction(userDetails);
-      if(response.success){
-        setMessage("Logged in successfully!"); 
-        setError("");
+      const response = await loginAction({ email, password });
+      
+      if (response.success) {
+        setMessage("Logged in successfully! Redirecting...");
         router.push("/");
-      }
-      else {
-        setError(response.message||'Login failed. Please try again');
-        setMessage('');
+      } else {
+        setError(response.message || 'Login failed. Please try again');
       }
     } catch (err) {
-      console.log(err);
-      setError(err.message||"An unexpected error occurred. Please try again");
-      setMessage("");
+      console.error(err);
+      setError(err.message || "An unexpected error occurred. Please try again");
+    } finally {
+      setLoading(false);
     }
   }
-async function handleGoogleSignIn(){
-  try {
-    await signIn("google",{
-      callbackUrl:"/",
-    });
+
+  async function handleGoogleSignIn() {
+    try {
+      await signIn("google", { callbackUrl: "/" });
+    } catch (err) {
+      console.error(err);
+      setError("Google Sign-In failed. Please try again later");
+    }
   }
-  catch(err){
-    console.error(err);
-    setError(err||"Google SignIn Failed. Please try again later");
-  }
-}
 
   return (
-    <div className="mt-4 flex flex-col justify-center items-center">
-      {error && 
-     <Alert  className='w-[350px] bg-transparent text-red-600 border border-red-600 '>
-      <AlertCircle className="h-5 w-5 stroke-red-600" />
-      <AlertTitle className="font-semibold">Error</AlertTitle>
-      <AlertDescription className="">
-        {error}
-      </AlertDescription>
-    </Alert>
-
-      }
-      {message && 
-          <Alert className="w-[350px] text-green-600 bg-transparent border border-green-600 mt-2">
-            <CircleCheck className="h-5 w-5 stroke-green-600" />
-            <AlertTitle className="font-semibold ">Success</AlertTitle>
-            <AlertDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0c111d] p-4">
+      <div className="w-full max-w-md">
+        {/* Success/Error Messages */}
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-5 w-5" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        {message && (
+          <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 border-green-600 dark:border-green-400">
+            <CircleCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <AlertTitle className="text-green-600 dark:text-green-400">Success</AlertTitle>
+            <AlertDescription className="text-green-600 dark:text-green-400">
               {message}
             </AlertDescription>
           </Alert>
-}
+        )}
 
-      <Card className="w-[350px] mt-3">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Login to access your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+        {/* Login Card */}
+        <Card className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              Log in to your account
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
+                  Email
+                </Label>
                 <Input
                   type="email"
                   id="email"
-                  autoComplete="email"
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="your@email.com"
+                  autoComplete="email"
                   required
+                  className="dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="password">Password</Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
+                  Password
+                </Label>
                 <Input
                   type="password"
                   id="password"
-                   autoComplete="current-password" 
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
                   required
+                  className="dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
-            </div>
-            <CardFooter className="flex flex-col items-center mt-4 space-y-3">
-              <Button type="submit" className="w-full text-md bg-indigo-700 text-white hover:bg-indigo-800">
-                Login
-              </Button>
-              <p className="text-sm text-gray-400">
-                Don't have an account?{" "}
-                <a href="/register" className="text-indigo-700 hover:underline">
-                  Register
-                </a>
-              </p>
-              <div className='flex items-center my-2 w-full gap-1'>
-                <hr className='border border-t w-full'/>
-                <span className="text-gray-400">or</span>
-                <hr className='border border-t w-full '/>
-              </div>
+
               <Button
-                  className='flex items-center w-full px-2 py-4  bg-white rounded-md text-black border hover:text-black border-gray-200 shadow-md hover:text-white '
-                  onClick={handleGoogleSignIn}>
-                <FcGoogle/>
-                Login with Google
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20 dark:shadow-indigo-900/30"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
               </Button>
-            </CardFooter>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
+              <FcGoogle className="h-5 w-5" />
+              Google
+            </Button>
+          </CardContent>
+
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Don't have an account?{" "}
+              <Button
+                variant="link"
+                className="text-indigo-600 dark:text-indigo-400 p-0 h-auto"
+                onClick={() => router.push('/register')}
+              >
+                Sign up
+              </Button>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 };
