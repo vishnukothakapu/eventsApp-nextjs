@@ -106,7 +106,7 @@ const PaymentPage = ({ params }) => {
                                 });
                                 const confirmData = await confirmPayment.json();
                                 if (confirmData.success) {
-                                    router.push(`/my-bookings/${data.eventId}`);
+                                    router.push(`/my-bookings/${confirmData.booking._id}`);
                                 }
                             }
                         },
