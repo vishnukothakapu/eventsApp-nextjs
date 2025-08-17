@@ -55,7 +55,7 @@ export async function POST(req,{params}){
             status:"pending",
         });
         await booking.save();
-        return NextResponse.json({success:true,order_id:order.id});
+        return NextResponse.json({success:true,order_id:order.id,eventId:event._id});
     }
     catch(err){
         console.log(err);
