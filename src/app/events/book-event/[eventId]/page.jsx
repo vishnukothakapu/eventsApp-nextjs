@@ -106,7 +106,7 @@ const PaymentPage = ({ params }) => {
                                 });
                                 const confirmData = await confirmPayment.json();
                                 if (confirmData.success) {
-                                    router.push(`/payment-success?event=${event._id}&paymentId=${response.razorpay_payment_id}`);
+                                    router.push(`/my-bookings/${event._id}`);
                                 }
                             }
                         },
